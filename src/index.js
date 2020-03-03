@@ -1,12 +1,36 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import { Router, Route, Switch } from 'react-router-dom'; //Can use browserHistory instead of Router to get access to props.history and then use push.
+import reduxThunk from 'redux-thunk'; //Also can use redux-promise
+import { Provider } from 'react-redux';
+import { createStore, applyMiddleware, compose } from 'redux';
+import history from './history';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import PostsList from './components/PostsList';
+import PostEdit from './components/PostEdit';
+import PostNew from './components/PostNew';
+import PostView from './components/PostView';
+import reducers from './reducers';
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+//Compose enchancers to hook redux devtools.
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose; //redux devtools.
+const store = createStore(
+	reducers,
+	composeEnhancers(applyMiddleware(reduxThunk))
+); //Create redux store with middleware.
+
+ReactDOM.render(
+	<Provider store={store}>
+		<Router history={history}>
+			<div className="ui container" style={{ marginTop: '10px' }}>
+				<Switch>
+					<Route path="/" exact component={PostsList} />
+					<Route path="/posts/new" exact component={PostNew} />
+					<Route path="/posts/edit/:id" exact component={PostEdit} />
+					<Route path="/posts/:id" exact component={PostView} />
+				</Switch>
+			</div>
+		</Router>
+	</Provider>,
+	document.querySelector('#root')
+);
